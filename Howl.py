@@ -52,6 +52,7 @@ if len(locationTuple) == 2:
     city = locationTuple[0]
     state = locationTuple[1]
 
+
 # Cast the width to an integer
 
 width = sys.argv[2]
@@ -76,7 +77,7 @@ maxLongitude = -181
 for line in yelpFile:
     data = json.loads(line)
     if data["type"] == "business":
-        if location == "ALL" or (data["city"] == city and data["state"] == state):
+        if location == "ALL" or (data["city"] == city and data["state"] == state) or (data["state"] == location):
             # Save the point
             latitude = data["latitude"]
             longitude = data["longitude"]
