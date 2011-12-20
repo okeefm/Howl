@@ -7,7 +7,7 @@ by Peter Hajas and Michael O'Keefe
 
 (Troy, NY as visualized by Howl)
 
-![Troy, NY as visualized by Howl with Google Maps underlay](http://i.imgur.com/vqYvB.png "Troy, NY With Map")
+![Troy, NY as visualized by Howl with Google Maps underlay](http://i.imgur.com/vqYvBl.png "Troy, NY With Map")
 
 (Troy, NY as visualized by Howl with Google Maps underlay)
 
