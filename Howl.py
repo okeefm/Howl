@@ -150,8 +150,6 @@ lrx, lry = latlontopixels(minLatitude, maxLongitude, zoom)
 dx = ceil(lrx - ulx)
 dy = ceil(uly - lry)
 
-print("dx: "+ str(dx) + " dy: " + str(dy))
-
 cols, rows = int(ceil(dx/maxsize)), int(ceil(dy/maxsize))
 
 largura = int(ceil(dx/cols))
@@ -166,7 +164,8 @@ for x in range(cols):
         dyn = altura * (0.5 + y)
         latn, lonn = pixelstolatlon(ulx + dxn, uly - dyn - bottom/2, zoom)
         position = ','.join((str(latn), str(lonn)))
-        print x, y, position
+	#Uncomment the line below to get Google Maps position updating statements        
+	#print x, y, position
         urlparams = urllib.urlencode({'center': position,
                                       'zoom': str(zoom),
                                       'size': '%dx%d' % (largura, alturaplus),
@@ -193,14 +192,14 @@ height = int(dy)
 
 hm = heatmap.Heatmap()
 
-# Save the heatmap as a PNG and KML file
+# Save the heatmap as a PNG, KML and a PNG with Google Maps file
 
 outputName = location
 
-hm.heatmap(points, outputName + ".png", 30, 200, (width,height), scheme='classic')
+hm.heatmap(points, outputName +"nomap.png", 30, 200, (width,height), scheme='classic')
 hm.saveKML(outputName + ".kml")
 
 ima = Image.open(outputName + ".png")
 final.paste(ima, None, ima)
 
-final.show()
+final.save(outputName + "map.png")
