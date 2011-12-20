@@ -49,7 +49,7 @@ INITIAL_RESOLUTION = EQUATOR_CIRCUMFERENCE / 256.0
 ORIGIN_SHIFT = EQUATOR_CIRCUMFERENCE / 2.0
 
 #More Google Maps constants
-zoom = 15 #this constant changes how many pictures get stitched together
+zoom = 14 #this constant changes how many pictures get stitched together
 scale = 1
 maxsize = 640
 bottom = 120
@@ -73,7 +73,7 @@ def pixelstolatlon(px, py, zoom):
     return lat, lon
 
 if len(sys.argv) < 4:
-    print "Howl, a parser for Yelp! JSON datasets!\nHowl will generate an image and a KML file for a city of your choice.\nAlternatively, pass \"ALL\" as the location for a map of all points.\n\nUsage: howl.py [City,State] [Output Image Width] [Yelp! Dataset Path]"
+    print "Howl, a parser for Yelp! JSON datasets!\nHowl will generate an image and a KML file for a city of your choice.\nAlternatively, pass \"ALL\" as the location for a map of all points.\n\nUsage: howl.py [City,State] [Output Image Width] [Yelp! Dataset Path] (optional)[Google Maps type, one of \"roadmap\", \"satellite\", \"terrain\", \"hybrid\"]"
     quit()
 
 city = state = None
@@ -87,13 +87,22 @@ if len(locationTuple) == 2:
     city = locationTuple[0]
     state = locationTuple[1]
 
-
 # Cast the width to an integer
 
 width = sys.argv[2]
 width = int(width)
 
 datasetLocation = sys.argv[3]
+
+# Parse out the maptype requested for Google Maps
+maptypes = ["roadmap", "satellite", "terrain", "hybrid"]
+maptype = "hybrid"
+if len(sys.argv) > 4:
+	if sys.argv[4].strip().lower() in maptypes:
+		maptype = sys.argv[4].strip().lower()
+	else:
+		print "The maptype you specified isn't recognized by Google Maps. Please use one of the following: \"roadmap\", \"satellite\", \"terrain\", or \"hybrid\" (or don't pass an argument, and use the default)"
+		quit()
 
 # Grab the academic dataset
 
@@ -169,7 +178,7 @@ for x in range(cols):
         urlparams = urllib.urlencode({'center': position,
                                       'zoom': str(zoom),
                                       'size': '%dx%d' % (largura, alturaplus),
-                                      'maptype': 'satellite',
+                                      'maptype': maptype,
                                       'sensor': 'false',
                                       'scale': scale})
         url = 'http://maps.google.com/maps/api/staticmap?' + urlparams
@@ -199,7 +208,7 @@ outputName = location
 hm.heatmap(points, outputName +"nomap.png", 30, 200, (width,height), scheme='classic')
 hm.saveKML(outputName + ".kml")
 
-ima = Image.open(outputName + ".png")
+ima = Image.open(outputName + "nomap.png")
 final.paste(ima, None, ima)
 
 final.save(outputName + "map.png")
