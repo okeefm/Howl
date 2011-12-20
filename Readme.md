@@ -1,11 +1,15 @@
 Howl, a visualizer for the Yelp! academic dataset
 =================================================
 
-by Peter Hajas
+by Peter Hajas and Michael O'Keefe
 
 ![Troy, NY as visualized by Howl](http://i.imgur.com/CTOmS.png "Troy, NY")
 
 (Troy, NY as visualized by Howl)
+
+![Troy, NY as visualized by Howl with Google Maps underlay](http://i.imgur.com/vqYvB.png "Troy, NY With Map")
+
+(Troy, NY as visualized by Howl with Google Maps underlay)
 
 About
 -----
@@ -30,21 +34,29 @@ or with ALL as a location, to generate an image for the entire dataset:
 `./Howl.py ALL 1024 yelp_academic_dataset.json`
 (this will probably take a while)
 
-and Howl will generate an image and KML file for your location.
+You can also run Howl with just the state:
+`./Howl.py NY 1024 yelp_academic_dataset.json`
 
-It'll save them in the current working directory, like this:
+If you want to specify the Google Maps type, you can do so after the yelp dataset location:
+`./Howl.py NY 1024 yelp_academic_dataset.json roadmap`
 
-`Troy,NY.png`, `Troy,NY.kml` or `ALL.png`
+The options are `roadmap` `satellite` `terrain` or `hybrid`.
+
+Howl will generate images and KML file for your location. It'll save them in the current working directory, like this:
+
+`Troy,NY_nomap.png`, `Troy,NY_map.png`, `Troy,NY.kml` or `ALL.png`
+
+Where the nomap files have no Google Maps underlay, and the map files do.
 
 Open Howl KML files in a tool like Google Earth to visualize reviews.
+
 
 It's really neat!
 
 Legal
 -----
 
-Howl is Copyright 2011 Peter Hajas. It's BSD licensed. The full text of the
-license can be found in Howl.py.
+Howl is Copyright 2011 Peter Hajas and Michael O'Keefe. It's BSD licensed. The full text of the license can be found in Howl.py.
 
 The work in Howl does not imply endorsement by past, current or future
 employers.
