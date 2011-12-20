@@ -205,10 +205,10 @@ hm = heatmap.Heatmap()
 
 outputName = location
 
-hm.heatmap(points, outputName +"nomap.png", 30, 200, (width,height), scheme='classic')
+hm.heatmap(points, outputName +"_nomap.png", 30, 200, (width,height), scheme='classic')
 hm.saveKML(outputName + ".kml")
 
-ima = Image.open(outputName + "nomap.png")
+ima = Image.open(outputName + "_nomap.png")
 final.paste(ima, None, ima)
 
-final.save(outputName + "map.png")
+final.save(outputName + "_map.png")
