@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Copyright (c) 2011, Peter Hajas
+# Additions Copyright (c) 2011, Michael O'Keefe
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification, are permitted
@@ -36,6 +37,40 @@
 import json
 import heatmap
 import os, sys
+import urllib
+import Image
+import StringIO
+from math import log, exp, tan, atan, pi, ceil
+
+#Google Maps constants
+EARTH_RADIUS = 6378137
+EQUATOR_CIRCUMFERENCE = 2 * pi * EARTH_RADIUS
+INITIAL_RESOLUTION = EQUATOR_CIRCUMFERENCE / 256.0
+ORIGIN_SHIFT = EQUATOR_CIRCUMFERENCE / 2.0
+
+#More Google Maps constants
+zoom = 15 #this constant changes how many pictures get stitched together
+scale = 1
+maxsize = 640
+bottom = 120
+
+def latlontopixels(lat, lon, zoom):
+    mx = (lon * ORIGIN_SHIFT) / 180.0
+    my = log(tan((90 + lat) * pi/360.0))/(pi/180.0)
+    my = (my * ORIGIN_SHIFT) /180.0
+    res = INITIAL_RESOLUTION / (2**zoom)
+    px = (mx + ORIGIN_SHIFT) / res
+    py = (my + ORIGIN_SHIFT) / res
+    return px, py
+
+def pixelstolatlon(px, py, zoom):
+    res = INITIAL_RESOLUTION / (2**zoom)
+    mx = px * res - ORIGIN_SHIFT
+    my = py * res - ORIGIN_SHIFT
+    lat = (my / ORIGIN_SHIFT) * 180.0
+    lat = 180 / pi * (2*atan(exp(lat*pi/180.0)) - pi/2.0)
+    lon = (mx / ORIGIN_SHIFT) * 180.0
+    return lat, lon
 
 if len(sys.argv) < 4:
     print "Howl, a parser for Yelp! JSON datasets!\nHowl will generate an image and a KML file for a city of your choice.\nAlternatively, pass \"ALL\" as the location for a map of all points.\n\nUsage: howl.py [City,State] [Output Image Width] [Yelp! Dataset Path]"
@@ -108,14 +143,51 @@ if len(points) == 0:
     print "No points for {0}, {1}".format(city, state)
     quit()
 
+# Do some stuff to get a google maps image
+ulx, uly = latlontopixels(maxLatitude, minLongitude, zoom)
+lrx, lry = latlontopixels(minLatitude, maxLongitude, zoom)
+
+dx = ceil(lrx - ulx)
+dy = ceil(uly - lry)
+
+print("dx: "+ str(dx) + " dy: " + str(dy))
+
+cols, rows = int(ceil(dx/maxsize)), int(ceil(dy/maxsize))
+
+largura = int(ceil(dx/cols))
+altura = int(ceil(dy/rows))
+alturaplus = altura + bottom
+
+final = Image.new("RGB", (int(dx), int(dy)))
+
+for x in range(cols):
+    for y in range(rows):
+        dxn = largura * (0.5 + x)
+        dyn = altura * (0.5 + y)
+        latn, lonn = pixelstolatlon(ulx + dxn, uly - dyn - bottom/2, zoom)
+        position = ','.join((str(latn), str(lonn)))
+        print x, y, position
+        urlparams = urllib.urlencode({'center': position,
+                                      'zoom': str(zoom),
+                                      'size': '%dx%d' % (largura, alturaplus),
+                                      'maptype': 'satellite',
+                                      'sensor': 'false',
+                                      'scale': scale})
+        url = 'http://maps.google.com/maps/api/staticmap?' + urlparams
+        f=urllib.urlopen(url)
+        im=Image.open(StringIO.StringIO(f.read()))
+        final.paste(im, (int(x*largura), int(y*altura)))
+
 # Compute dimensions such that we can have an image with the right aspect ratio
 
 longitudeDifference = maxLongitude - minLongitude
 latitudeDifference = maxLatitude - minLatitude
 
-scaleFactor = width / longitudeDifference
+width = int(dx)
+height = int(dy)
+#scaleFactor = width / longitudeDifference
 
-height = int(scaleFactor * latitudeDifference)
+#height = int(scaleFactor * latitudeDifference)
 
 # Now, ask heatmap to create a heatmap
 
@@ -127,3 +199,8 @@ outputName = location
 
 hm.heatmap(points, outputName + ".png", 30, 200, (width,height), scheme='classic')
 hm.saveKML(outputName + ".kml")
+
+ima = Image.open(outputName + ".png")
+final.paste(ima, None, ima)
+
+final.show()
